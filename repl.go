@@ -70,6 +70,11 @@ func commandExplore(cfg *config) error {
         return errors.New("Couldn't explore " + areaName)
     }
 
+    if len(pokemons) == 0 {
+        log.Println("Found no pokemons in the area.")
+        return errors.New("Found no pokemons in the area.")
+    }
+
     fmt.Println("Found Pokemon:")
 
     for _, v := range pokemons {
