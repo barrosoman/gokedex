@@ -58,11 +58,6 @@ type RespLocationInfo struct {
 	} `json:"pokemon_encounters"`
 }
 
-type Pokemon struct {
-    Name string
-    URL string
-}
-
 func GetLocationInfoFromBody(body []byte) (RespLocationInfo, error) {
     var locationInfo RespLocationInfo
 
@@ -74,14 +69,35 @@ func GetLocationInfoFromBody(body []byte) (RespLocationInfo, error) {
 	return locationInfo, nil
 }
 
-func GetPokemonsFromLocation(locationInfo RespLocationInfo) ([]Pokemon, error) {
-    pokemonsInLocation := make([]Pokemon, 0)
+func (c Client) GetLocation(areaName string) (RespLocationInfo, error) {
+    var locationInfo RespLocationInfo
+    var err error
 
-    for _, v := range locationInfo.PokemonEncounters {
-        pokemon := Pokemon{Name: v.Pokemon.Name, URL: v.Pokemon.URL}
+    areaURL := BaseUrl + LocationAreaUrl + areaName
 
-        pokemonsInLocation = append(pokemonsInLocation, pokemon)
+	val, ok := c.Cache.Get(areaURL)
+
+	if !ok {
+		log.Println("Getting location info from internet!")
+		body, err := c.GetBodyFromUrl(areaURL)
+
+        if err != nil {
+            return RespLocationInfo{}, err
+        }
+
+		c.Cache.Add(areaURL, body)
+
+        locationInfo, err = GetLocationInfoFromBody(body)
+	} else {
+		log.Println("Getting location info from cache!")
+
+        locationInfo, err = GetLocationInfoFromBody(val)
+	}
+
+    if err != nil {
+        return RespLocationInfo{}, nil
     }
 
-    return pokemonsInLocation, nil
+    return locationInfo, nil
 }
+

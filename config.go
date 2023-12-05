@@ -2,14 +2,13 @@ package main
 
 import (
 	"pokedex-go/internal/pokeapi"
-	"pokedex-go/internal/pokecache"
 )
 
 type config struct {
-	cache                pokecache.Cache
+    client               pokeapi.Client
+    pokemons             map[string]pokeapi.Pokemon
 	previousLocationsURL string
 	nextLocationsURL     string
-    parametersStrings    []string
 }
 
 func (cfg *config) setPreviousLocationsURL(newURL string) {

@@ -1,5 +1,7 @@
 package pokeapi
 
 const (
-	BaseURL string = "https://pokeapi.co/api/v2/"
+	BaseUrl string = "https://pokeapi.co/api/v2/"
+    LocationAreaUrl string = "location-area/"
+    PokemonUrl string = "pokemon/"
 )

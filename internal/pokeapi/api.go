@@ -4,11 +4,10 @@ import (
 	"errors"
 	"io"
 	"log"
-	"net/http"
 )
 
-func GetBodyFromUrl(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func (c Client) GetBodyFromUrl(url string) ([]byte, error) {
+	resp, err := c.httpClient.Get(url)
 
 	if err != nil {
 		log.Println("Couldn't get response from URL '" + url + "'.")
@@ -16,6 +15,7 @@ func GetBodyFromUrl(url string) ([]byte, error) {
 	}
 
 	body, err := io.ReadAll(resp.Body)
+    defer resp.Body.Close()
 
 	if err != nil {
 		log.Println("Couldn't read body of http response.")
