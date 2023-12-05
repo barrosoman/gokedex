@@ -16,22 +16,30 @@ type RespLocationsList struct {
 }
 
 
-func GetLocationBodyFromUrl(apiURL string) []byte {
-	url := baseURL + "location-area/"
+func GetLocationBodyFromUrl(apiURL string) ([]byte, error) {
+	url := BaseURL + "location-area/"
 
 	if apiURL != "" {
 		url = apiURL
 	}
 
-	body := getBodyFromUrl(url)
+	body, err := GetBodyFromUrl(url)
 
-	return body
+    if err != nil {
+        return nil, err
+    }
+
+	return body, nil
 }
 
-func GetLocationsFromUrl(apiURL *string) RespLocationsList {
-    body := GetLocationBodyFromUrl(*apiURL)
+func GetLocationsFromUrl(apiURL *string) (RespLocationsList, error) {
+    body, err := GetLocationBodyFromUrl(*apiURL)
 
-	return GetLocationsFromBody(body)
+    if err != nil {
+        return RespLocationsList{}, err
+    }
+
+	return GetLocationsFromBody(body), nil
 }
 
 func GetLocationsFromBody(body []byte) RespLocationsList {

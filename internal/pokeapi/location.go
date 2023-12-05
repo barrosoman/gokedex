@@ -63,10 +63,8 @@ type Pokemon struct {
     URL string
 }
 
-func GetLocationInfo(locationURL string) (RespLocationInfo, error) {
-	var locationInfo RespLocationInfo
-
-    var body = getBodyFromUrl(locationURL)
+func GetLocationInfoFromBody(body []byte) (RespLocationInfo, error) {
+    var locationInfo RespLocationInfo
 
 	if err := json.Unmarshal(body, &locationInfo); err != nil {
 		log.Println("Couldn't unmarshall json of locations list.")
@@ -76,13 +74,7 @@ func GetLocationInfo(locationURL string) (RespLocationInfo, error) {
 	return locationInfo, nil
 }
 
-func GetPokemonsFromLocation(location string) ([]Pokemon, error) {
-    locationInfo, err := GetLocationInfo(location)
-
-    if err != nil {
-        return nil, err
-    }
-
+func GetPokemonsFromLocation(locationInfo RespLocationInfo) ([]Pokemon, error) {
     pokemonsInLocation := make([]Pokemon, 0)
 
     for _, v := range locationInfo.PokemonEncounters {

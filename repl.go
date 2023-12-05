@@ -29,31 +29,49 @@ func commandExplore(cfg *config) error {
         return errors.New("Usage of command is 'explore \"location name\"'.")
     }
 
-    locationString := cfg.parametersStrings[0]
-    fmt.Println("Exploring", locationString, "...")
+    areaName := cfg.parametersStrings[0]
+    areaURL := pokeapi.BaseURL + "location-area/" + areaName
 
-    // pokemons, err := pokeapi.GetPokemonsFromLocation(locationString)
+    fmt.Println("Exploring", areaName, "...")
 
     var pokemons []pokeapi.Pokemon
+    var err error
 
-	val, ok := cfg.cache.Get(cfg.nextLocationsURL)
+	val, ok := cfg.cache.Get(areaURL)
+
 
 	if !ok {
-		body := pokeapi.GetLocationBodyFromUrl(cfg.nextLocationsURL)
+		log.Println("Getting location info from internet!")
+		body, err := pokeapi.GetBodyFromUrl(areaURL)
 
-		cfg.cache.Add(cfg.nextLocationsURL, body)
+        if err != nil {
+            return errors.New("Couldn't explore " + areaName)
+        }
 
-		pokemons = pokeapi.GetLocationsFromBody(body)
+		cfg.cache.Add(areaURL, body)
+
+        locationInfo, err := pokeapi.GetLocationInfoFromBody(body)
+
+        pokemons, err = pokeapi.GetPokemonsFromLocation(locationInfo)
 	} else {
-		log.Println("Getting location list from cache!")
-		pokemons = pokeapi.GetLocationsFromBody(val)
+		log.Println("Getting location info from cache!")
+
+        locationInfo, err := pokeapi.GetLocationInfoFromBody(val)
+
+
+        if err != nil {
+            return errors.New("Couldn't explore " + areaName)
+        }
+
+		pokemons, err = pokeapi.GetPokemonsFromLocation(locationInfo)
 	}
 
     if err != nil {
-        return errors.New("Couldn't explore " + locationString)
+        return errors.New("Couldn't explore " + areaName)
     }
 
     fmt.Println("Found Pokemon:")
+
     for _, v := range pokemons {
         fmt.Println(" - ", v.Name)
     }
@@ -81,7 +99,11 @@ func commandMap(cfg *config) error {
 	val, ok := cfg.cache.Get(cfg.nextLocationsURL)
 
 	if !ok {
-		body := pokeapi.GetLocationBodyFromUrl(cfg.nextLocationsURL)
+		body, err := pokeapi.GetLocationBodyFromUrl(cfg.nextLocationsURL)
+
+        if err != nil {
+            return errors.New("Couldn't get further locations.")
+        }
 
 		cfg.cache.Add(cfg.nextLocationsURL, body)
 
@@ -109,7 +131,11 @@ func commandMapb(cfg *config) error {
 	val, ok := cfg.cache.Get(cfg.previousLocationsURL)
 
 	if !ok {
-		body := pokeapi.GetLocationBodyFromUrl(cfg.previousLocationsURL)
+		body, err := pokeapi.GetLocationBodyFromUrl(cfg.previousLocationsURL)
+
+        if err != nil {
+            return errors.New("Couldn't get previous locations.")
+        }
 
 		cfg.cache.Add(cfg.previousLocationsURL, body)
 
