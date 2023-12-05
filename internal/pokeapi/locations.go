@@ -2,9 +2,7 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"io"
 	"log"
-	"net/http"
 )
 
 type RespLocationsList struct {
@@ -17,25 +15,9 @@ type RespLocationsList struct {
 	} `json:"results"`
 }
 
-func getBodyFromUrl(url string) []byte {
-	resp, err := http.Get(url)
-
-	if err != nil {
-		log.Fatalf("Couldn't get response from URL \"%s\".\n", url)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-
-	if err != nil {
-		log.Println("Couldn't read body of http response.")
-		log.Fatal(err)
-	}
-
-	return body
-}
 
 func GetLocationBodyFromUrl(apiURL string) []byte {
-	url := baseURL + "location/"
+	url := baseURL + "location-area/"
 
 	if apiURL != "" {
 		url = apiURL

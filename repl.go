@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -15,6 +16,49 @@ type cliCommand struct {
 	name        string
 	description string
 	callback    func(cfg *config) error
+}
+
+func commandExplore(cfg *config) error {
+	if cfg == nil {
+		log.Fatal("The config struct was of value nil, can't continue.")
+	}
+
+
+    if len(cfg.parametersStrings) < 1 {
+        log.Println("Usage of command is 'explore \"location name\"'.")
+        return errors.New("Usage of command is 'explore \"location name\"'.")
+    }
+
+    locationString := cfg.parametersStrings[0]
+    fmt.Println("Exploring", locationString, "...")
+
+    // pokemons, err := pokeapi.GetPokemonsFromLocation(locationString)
+
+    var pokemons []pokeapi.Pokemon
+
+	val, ok := cfg.cache.Get(cfg.nextLocationsURL)
+
+	if !ok {
+		body := pokeapi.GetLocationBodyFromUrl(cfg.nextLocationsURL)
+
+		cfg.cache.Add(cfg.nextLocationsURL, body)
+
+		pokemons = pokeapi.GetLocationsFromBody(body)
+	} else {
+		log.Println("Getting location list from cache!")
+		pokemons = pokeapi.GetLocationsFromBody(val)
+	}
+
+    if err != nil {
+        return errors.New("Couldn't explore " + locationString)
+    }
+
+    fmt.Println("Found Pokemon:")
+    for _, v := range pokemons {
+        fmt.Println(" - ", v.Name)
+    }
+
+    return nil
 }
 
 func commandHelp(cfg *config) error {
@@ -99,9 +143,14 @@ func setupCommands() map[string]cliCommand {
 			callback:    commandHelp,
 		},
 		"exit": {
-			name:        "help",
+			name:        "exit",
 			description: "Displays a help message",
 			callback:    commandExit,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Displays ",
+			callback:    commandExplore,
 		},
 		"map": {
 			name:        "map",
@@ -135,11 +184,17 @@ func startRepl() {
 		commandString := words[0]
 		command, ok := commands[commandString]
 
+        cfg.parametersStrings = words[1:len(words)]
+
 		if !ok {
 			fmt.Printf("Command \"%s\" does not exists.\n", commandString)
 			continue
 		}
 
-		command.callback(&cfg)
+        err := command.callback(&cfg)
+
+        if err != nil {
+            fmt.Println(err)
+        }
 	}
 }

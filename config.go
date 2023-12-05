@@ -9,6 +9,7 @@ type config struct {
 	cache                pokecache.Cache
 	previousLocationsURL string
 	nextLocationsURL     string
+    parametersStrings    []string
 }
 
 func (cfg *config) setPreviousLocationsURL(newURL string) {
